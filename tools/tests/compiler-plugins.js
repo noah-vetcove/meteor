@@ -74,8 +74,10 @@ selftest.define("compiler plugin caching - coffee", () => {
 
   // Only recompiles f2.
   matchRun(["/f2.coffee"], "web.browser");
-  matchRun(["/f2.coffee"], "web.browser.legacy");
   matchRun(["/f2.coffee"], osArch);
+  // When the app is rebuilt, the web.brower.legacy build is delayed until
+  // after the other builds.
+  matchRun(["/f2.coffee"], "web.browser.legacy");
 
   // Program prints this:
   run.match("Coffeescript X is 2 Y is 3 FromPackage is 4");
@@ -86,8 +88,8 @@ selftest.define("compiler plugin caching - coffee", () => {
   s.append("packages/local-pack/package.js", "\n// foo\n");
 
   matchRun([], "web.browser");
-  matchRun([], "web.browser.legacy");
   matchRun([], osArch);
+  matchRun([], "web.browser.legacy");
 
   run.match("Coffeescript X is 2 Y is 3 FromPackage is 4");
 
@@ -96,8 +98,8 @@ selftest.define("compiler plugin caching - coffee", () => {
   s.write("packages/local-pack/p.coffee", "FromPackage = 'FromPackage is 5'");
 
   matchRun(["/packages/local-pack/p.coffee"], "web.browser");
-  matchRun(["/packages/local-pack/p.coffee"], "web.browser.legacy");
   matchRun(["/packages/local-pack/p.coffee"], osArch);
+  matchRun(["/packages/local-pack/p.coffee"], "web.browser.legacy");
 
   run.match("Coffeescript X is 2 Y is 3 FromPackage is 5");
 
@@ -119,6 +121,8 @@ selftest.define("compiler plugin caching - coffee", () => {
   nextRunOrdinal = 1;
 
   matchRun(["/f2.coffee"], "web.browser");
+  // Since we just shut the server down and restarted it, the
+  // web.browser.legacy build is not delayed.
   matchRun(["/f2.coffee"], "web.browser.legacy");
   matchRun(["/f2.coffee"], osArch);
 
@@ -241,8 +245,8 @@ selftest.define("compiler plugin caching - coffee", () => {
             setVariable('el4-style', 'inset'));
     expectedBorderStyles.el4 = 'inset';
     matchRun([`/top.${ extension }`], "web.browser");
-    matchRun([`/top.${ extension }`], "web.browser.legacy");
     run.match("Client modified -- refreshing");
+    matchRun([`/top.${ extension }`], "web.browser.legacy");
     checkCSS(expectedBorderStyles);
 
     // This works for changing a root too.
@@ -250,8 +254,8 @@ selftest.define("compiler plugin caching - coffee", () => {
             '.el0 { border-style: double; }\n');
     expectedBorderStyles.el0 = 'double';
     matchRun([`/subdir/nested-root.${ extension }`], "web.browser");
-    matchRun([`/subdir/nested-root.${ extension }`], "web.browser.legacy");
     run.match("Client modified -- refreshing");
+    matchRun([`/subdir/nested-root.${ extension }`], "web.browser.legacy");
     checkCSS(expectedBorderStyles);
 
     // Adding a new root works too.
@@ -259,8 +263,8 @@ selftest.define("compiler plugin caching - coffee", () => {
             '.el6 { border-style: solid; }\n');
     expectedBorderStyles.el6 = 'solid';
     matchRun([`/yet-another-root.${ extension }`], "web.browser");
-    matchRun([`/yet-another-root.${ extension }`], "web.browser.legacy");
     run.match("Client modified -- refreshing");
+    matchRun([`/yet-another-root.${ extension }`], "web.browser.legacy");
     checkCSS(expectedBorderStyles);
 
     // We never should have loaded cache from disk, since we only made
